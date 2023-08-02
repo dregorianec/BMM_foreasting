@@ -125,62 +125,81 @@ class Ui_mainWindow(object):
         self.SaveButton.clicked.connect(lambda: self.SaveButton_clicked())
 
     def AddButton_clicked(self):
-        wb_patch = QtWidgets.QFileDialog.getOpenFileNames(directory="/home", filter="XML files (*.xls)")[0]
-        if wb_patch != "":
-            for i in range(len(wb_patch)):
-                # len_i_wb_patch = len(wb_patch[i])
-                mass = wb_patch[i].split('/')
-                standart_dir = "./indb/" + mass[-1]
-                shutil.copy2(wb_patch[i], standart_dir )
-                treatment.CreateTrainExcelFile(standart_dir)
+        try:
+            wb_patch = QtWidgets.QFileDialog.getOpenFileNames(directory="/home", filter="XML files (*.xls, *.xlsx)")[0]
+            if wb_patch != "":
+                for i in range(len(wb_patch)):
+                    # len_i_wb_patch = len(wb_patch[i])
+                    mass = wb_patch[i].split('/')
+                    f = open('123.txt', 'w')
+                    f.write(mass[-1])
+                    f.close()
+                    standart_dir = 'indb/' + mass[-1]
+                    shutil.copy2(wb_patch[i], standart_dir )
+                    f = open('123.txt', 'w')
+                    f.write(standart_dir)
+                    f.close()
+
+                    treatment.CreateTrainExcelFile(standart_dir)
+        except Exception as ex:
+            template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+            print(template.format(type(ex).__name__, ex.args))
         
 
     def GenerButton_clicked(self):
-        massage = QtWidgets.QMessageBox(MainWindow)
-        massage.setText("Подождите, программа выполняется...")
-        # massage.setParent(self.Grafics)
-        massage.exec()
-        
-        pop, self.y_pred, self.dover, self.fh = forecast_generation.main(self.DNBox.currentText(), self.SrokBox.currentText())
+        try:
+            massage = QtWidgets.QMessageBox(MainWindow)
+            massage.setText("Подождите, программа выполняется...")
+            # massage.setParent(self.Grafics)
+            massage.exec()
 
-        # sc = MplCanvas( self.Grafics, width=5, height=4, dpi=100)
-        # sc.axes.plot([0,1,2,3,4], [10,1,20,3,40])
-        # maingrafic = QtWidgets.QMdiSubWindow()
-        # maingrafic.setWidget(sc)
-        pop.reverse()
-        for i in range(len(pop)):
-            pop[i].setParent(self.Grafics)
-            self.Grafics.addSubWindow(pop[i])
-            pop[i].show()
-        # maingrafic.show()
-        self.Grafics.tileSubWindows()
-        massage.close()
+            pop, self.y_pred, self.dover, self.fh = forecast_generation.main(self.DNBox.currentText(), self.SrokBox.currentText())
+
+            # sc = MplCanvas( self.Grafics, width=5, height=4, dpi=100)
+            # sc.axes.plot([0,1,2,3,4], [10,1,20,3,40])
+            # maingrafic = QtWidgets.QMdiSubWindow()
+            # maingrafic.setWidget(sc)
+            pop.reverse()
+            for i in range(len(pop)):
+                pop[i].setParent(self.Grafics)
+                self.Grafics.addSubWindow(pop[i])
+                pop[i].show()
+            # maingrafic.show()
+            self.Grafics.tileSubWindows()
+            massage.close()
+        except Exception as ex:
+            template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+            print(template.format(type(ex).__name__, ex.args))
         
     def SaveButton_clicked(self):
-        dir_path = QtWidgets.QFileDialog.getExistingDirectory()
+        try:
+            dir_path = QtWidgets.QFileDialog.getExistingDirectory()
 
-        if dir_path != "" and self.y_pred != 0:
-            date = pd.read_excel("./train_indb/DN15.xlsx",index_col = False).fillna(0)
-            date = date.iloc[-1][0]
+            if dir_path != "" and self.y_pred != 0:
+                date = pd.read_excel("./train_indb/DN15.xlsx",index_col = False).fillna(0)
+                date = date.iloc[-1][0]
             # сделать норм формат файла !!!!!!!!!!!
-            if self.SrokBox.currentText() == "3 месяца":
-                filename= dir_path +"/forecast"+ self.DNBox.currentText()+"_" + str(date)[0:9]+"_to_3_month.xlsx"
-            else:
-                filename=dir_path + "/forecast"+ self.DNBox.currentText()+"_" + str(date)[0:9]+"_to_1_year.xlsx"
+                if self.SrokBox.currentText() == "3 месяца":
+                    filename= dir_path +"/forecast"+ self.DNBox.currentText()+"_" + str(date)[0:9]+"_to_3_month.xlsx"
+                else:
+                    filename=dir_path + "/forecast"+ self.DNBox.currentText()+"_" + str(date)[0:9]+"_to_1_year.xlsx"
             
             # Создаем объект writer с указанием пути сохранения filename
-            writer = pd.ExcelWriter(filename, engine='xlsxwriter')
+                writer = pd.ExcelWriter(filename, engine='xlsxwriter')
 
             # Записываем данные из датафрейма в Excel
-            all = pd.concat([pd.DataFrame(self.y_pred.predicted_mean), pd.DataFrame(self.dover.iloc[: , 0]), pd.DataFrame(self.dover.iloc[: , 1])], axis=1)
-            all.columns = ['mean', 'lower', 'upper']
-            all['time'] = self.fh
-            all = all[['time'] + [x for x in all.columns if x != 'time']]
-            all.to_excel(writer, index=False)
+                all = pd.concat([pd.DataFrame(self.y_pred.predicted_mean), pd.DataFrame(self.dover.iloc[: , 0]), pd.DataFrame(self.dover.iloc[: , 1])], axis=1)
+                all.columns = ['mean', 'lower', 'upper']
+                all['time'] = self.fh
+                all = all[['time'] + [x for x in all.columns if x != 'time']]
+                all.to_excel(writer, index=False)
 
             # Сохраняем файл
             # writer.save()
-            writer.close()
+                writer.close()
+        except Exception as ex:
+            template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+            print(template.format(type(ex).__name__, ex.args))
         
 
     def CloseButton_clicked(self):
@@ -188,10 +207,14 @@ class Ui_mainWindow(object):
 
 if __name__ == "__main__":
     import sys
-    app = QtWidgets.QApplication(sys.argv)
-    MainWindow = QtWidgets.QMainWindow()
-    ui = Ui_mainWindow()
-    ui.setupUi(MainWindow)
-    MainWindow.showMaximized()
-    MainWindow.show()
-    sys.exit(app.exec_())
+    try:
+        app = QtWidgets.QApplication(sys.argv)
+        MainWindow = QtWidgets.QMainWindow()
+        ui = Ui_mainWindow()
+        ui.setupUi(MainWindow)
+        MainWindow.showMaximized()
+        MainWindow.show()
+        sys.exit(app.exec_())
+    except Exception as ex:
+        template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+        print(template.format(type(ex).__name__, ex.args))
