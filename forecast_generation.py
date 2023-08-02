@@ -63,11 +63,11 @@ def Click_OK(DN, srok):
 
     results = forecaster.fit()
     if srok == '3 месяца':
-        fh = pd.date_range(date, freq='M', periods=3)
-        y_pred = results.get_forecast(steps = 3)
+        fh = pd.date_range(date, freq='M', periods=4)[1:]
+        y_pred = results.get_forecast(steps = 4)
     else:
-        fh = pd.date_range(date, freq='M', periods=12)
-        y_pred = results.get_forecast(steps = 12)
+        fh = pd.date_range(date, freq='M', periods=13)[1:]
+        y_pred = results.get_forecast(steps = 13)
     
 
 #Confidence intervals of the forecasted values
